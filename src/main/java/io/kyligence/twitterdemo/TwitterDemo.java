@@ -24,7 +24,7 @@ public class TwitterDemo {
 
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(TwitterDemo.class);
-        KafkaSettings kafkaSettings = context.getBean(KafkaSettings.class);
+        final KafkaSettings kafkaSettings = context.getBean(KafkaSettings.class);
         Properties prop = new Properties();
         prop.put("bootstrap.servers", kafkaSettings.getBrokers());
         prop.put("acks", "0");
@@ -32,11 +32,18 @@ public class TwitterDemo {
         prop.put("key.serializer", StringSerializer.class.getCanonicalName());
         final String topic = kafkaSettings.getTopic();
         final KafkaProducer<String, String> kafkaProducer = new KafkaProducer<String, String>(prop);
-
+        final int factor = kafkaSettings.getFactor();
         final Gson gson = new Gson();
         StatusListener listener = new StatusListener() {
             public void onStatus(Status status) {
-                kafkaProducer.send(new ProducerRecord<String, String>(topic, null, gson.toJson(status)));
+                if(factor > 0){
+                    for(int i=0;i<factor;i++){
+                        kafkaProducer.send(new ProducerRecord<String, String>(topic, null, gson.toJson(status)));
+                    }
+                }else{
+                    System.out.println("factor error");
+                }
+
             }
 
             public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
