@@ -22,7 +22,7 @@ import java.util.Properties;
 @SpringBootApplication
 public class TwitterDemo {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         ApplicationContext context = SpringApplication.run(TwitterDemo.class);
         final KafkaSettings kafkaSettings = context.getBean(KafkaSettings.class);
         Properties prop = new Properties();
@@ -32,18 +32,18 @@ public class TwitterDemo {
         prop.put("key.serializer", StringSerializer.class.getCanonicalName());
         final String topic = kafkaSettings.getTopic();
         final KafkaProducer<String, String> kafkaProducer = new KafkaProducer<String, String>(prop);
-        final int factor = kafkaSettings.getFactor();
+        final int factor;
+        if(args != null || args.length > 0){
+            factor = Integer.parseInt(args[0]);
+        }else{
+            factor = 1;
+        }
         final Gson gson = new Gson();
         StatusListener listener = new StatusListener() {
             public void onStatus(Status status) {
-                if(factor > 0){
-                    for(int i=0;i<factor;i++){
-                        kafkaProducer.send(new ProducerRecord<String, String>(topic, null, gson.toJson(status)));
-                    }
-                }else{
-                    System.out.println("factor error");
+                for(int i=0;i<factor;i++){
+                    kafkaProducer.send(new ProducerRecord<String, String>(topic, null, gson.toJson(status)));
                 }
-
             }
 
             public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {

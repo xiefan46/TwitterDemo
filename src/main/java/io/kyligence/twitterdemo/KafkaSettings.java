@@ -15,8 +15,6 @@ public class KafkaSettings {
     @Value("${kafka.topic}")
     private String topic;
 
-    @Value("{kafka.factor}")
-    private String factor;
 
     public String getBrokers() {
         return brokers;
@@ -26,13 +24,5 @@ public class KafkaSettings {
         return topic;
     }
 
-    public int getFactor(){
-        try{
-            int f = Integer.parseInt(factor);
-            return f;
-        }catch(NumberFormatException e){
-            e.printStackTrace();
-            return -1;
-        }
-    }
+
 }
