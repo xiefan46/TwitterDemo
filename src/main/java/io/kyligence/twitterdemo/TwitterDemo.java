@@ -32,12 +32,7 @@ public class TwitterDemo {
         prop.put("key.serializer", StringSerializer.class.getCanonicalName());
         final String topic = kafkaSettings.getTopic();
         final KafkaProducer<String, String> kafkaProducer = new KafkaProducer<String, String>(prop);
-        final int factor;
-        if(args != null || args.length > 0){
-            factor = Integer.parseInt(args[0]);
-        }else{
-            factor = 1;
-        }
+        final int factor = kafkaSettings.getFactor();
         final Gson gson = new Gson();
         StatusListener listener = new StatusListener() {
             public void onStatus(Status status) {
